@@ -2,6 +2,7 @@ from flask import abort, jsonify, request
 from flask_restful import Resource, Api, fields, marshal_with
 from sqlalchemy import or_
 from flask_security import current_user, auth_required
+from sqlalchemy.orm import joinedload
 
 from src.model import Creator, Playlist, Role, Song, User, db
 
@@ -59,11 +60,19 @@ class UserResource(Resource):
     #     db.session.delete(user)
     #     db.session.commit()
     #     return jsonify({"message": "User deleted successfully"})
+creator_fields = {
+    'creator_id': fields.Integer,
+    'artist_name': fields.String,
+    'user_id' : fields.Integer,
+}
 
 song_fields = {
     'id': fields.Integer,
+    'name': fields.String,
+    'description' : fields.String,
     'creator_id': fields.Integer,
     'playlist_id': fields.Integer,
+    'creator': fields.Nested(creator_fields),  # Nested Creator
     'ratings': fields.List(fields.Nested({
         'id': fields.Integer,
         'user_id': fields.Integer,
@@ -73,19 +82,22 @@ song_fields = {
     }))
 }
 
+
 playlist_fields = {
-    'id': fields.Integer,
-    'user_id': fields.Integer,  # Creator ID in this context
+    'id' : fields.Integer,
+    'creator_id': fields.Integer,
+    'name' : fields.String,
     'songs': fields.List(fields.Nested(song_fields)),
     'created_at': fields.DateTime
 }
+
 creator_fields = {
-    'id' : fields.Integer,
+    'creator_id' : fields.Integer,
+    'artist_name' : fields.String,
     'user' : fields.Nested(user_list_fields),
     'songs' : fields.List(fields.Nested(song_fields)),
     'playlists' : fields.List(fields.Nested(playlist_fields)), 
 }
-
 
 def get_instance_or_abort(model, id):
     instance = model.query.get(id)
@@ -102,53 +114,91 @@ class CreatorResource(Resource):
         creators = Creator.query.all()
         return creators
 
-    def post(self):
-        data = request.get_json()
-        new_creator = Creator(creator_id=data['creator_id'])
-        db.session.add(new_creator)
-        db.session.commit()
-        return {"message": "Creator created successfully", "id": new_creator.id}, 201
+    # def put(self, creator_id):
+    #     creator = get_instance_or_abort(Creator, creator_id)
+    #     data = request.get_json()
+    #     creator.creator_id = data.get('creator_id', creator.creator_id)
+    #     db.session.commit()
+    #     return {"message": "Creator updated successfully"}
 
-    def put(self, creator_id):
-        creator = get_instance_or_abort(Creator, creator_id)
-        data = request.get_json()
-        creator.creator_id = data.get('creator_id', creator.creator_id)
-        db.session.commit()
-        return {"message": "Creator updated successfully"}
-
-    def delete(self, creator_id):
-        creator = get_instance_or_abort(Creator, creator_id)
-        db.session.delete(creator)
-        db.session.commit()
-        return {"message": "Creator deleted successfully"}
+    # def delete(self, creator_id):
+    #     creator = get_instance_or_abort(Creator, creator_id)
+    #     db.session.delete(creator)
+    #     db.session.commit()
+    #     return {"message": "Creator deleted successfully"}
 
 # Song Resource
 class SongResource(Resource):
     @marshal_with(song_fields)
-    def get(self, song_id=None):
+    def get(self, song_id = None):
         if song_id:
-            return get_instance_or_abort(Song, song_id)
+            song = Song.query.get(song_id)
+            return song
         songs = Song.query.all()
         return songs
+
+
+    # @marshal_with(song_fields)
+    # def get(self, song_id=None):
+    #     if song_id:
+    #         # Fetch a single song by ID or return 404
+    #         song = get_instance_or_abort(Song, song_id)
+    #         print(song.creator)
+    #         return self.serialize_song(song)
+        
+    #     # Fetch all songs with their creators
+    #     songs = Song.query.options(joinedload(Song.creator)).all()
+        
+    #     # Serialize each song
+    #     serialized_songs = [self.serialize_song(song) for song in songs]
+        
+    #     return jsonify(serialized_songs)
+
+    # def serialize_song(self, song):
+    #     """Convert a Song object into a dictionary, including nested creator data."""
+    #     return {
+    #         "id": song.id,
+    #         "name": song.name,
+    #         "description": song.description,
+    #         "creator_id": song.creator_id,
+    #         "playlist_id": song.playlist_id,
+    #         "creator": {
+    #             "id": song.creator.id if song.creator else None,
+    #             "artist_name": song.creator.artist_name if song.creator else None,
+    #         },
+    #         "ratings": [
+    #             {
+    #                 "id": rating.id,
+    #                 "user_id": rating.user_id,
+    #                 "song_id": rating.song_id,
+    #                 "rating": rating.rating,
+    #                 "created_at": rating.created_at.isoformat(),
+    #             }
+    #             for rating in song.ratings
+    #         ],
+    #     }
 
     @auth_required()
     def post(self):
         data = request.get_json()
-        user_id = current_user.id 
-        new_song = Song( name = data.get('name'), description = data.get('description'),playlist_id=data.get('playlist_id'), creator_id = user_id)
+        print(data)
+        if (current_user.roles[0] != 'creator'):
+            return {'message' : 'role not authorized'}
+        creator_id = current_user.creator.creator_id 
+        new_song = Song( name = data.get('name'), description = data.get('description'),playlist_id=data.get('playlist_id'), creator_id = creator_id)
         db.session.add(new_song)
         db.session.commit()
         return {"message": "Song created successfully", "id": new_song.id}, 201
 
     @auth_required()
     def put(self, song_id):
-        song = get_instance_or_abort(Song, song_id)
+        song = Song.query.get_or_404(song_id)
         # check if the the song is created by the user
-        print(current_user.creator.id)
-        creator_id = current_user.id
-        if song.creator_id != creator_id:
-            return jsonify({'message' : 'your are not the creator' })
-        
+        print(current_user.creator.songs)
+        if (current_user.roles[0] != 'creator'):
+            return {'message' : 'role not authorized'}
+        creator_id = current_user.creator.creator_id 
+
         data = request.get_json()
         song.creator_id = data.get('creator_id', song.creator_id) # transfer ownership
         song.playlist_id = data.get('playlist_id', song.playlist_id)  # add song to playlist
@@ -157,8 +207,8 @@ class SongResource(Resource):
 
     def delete(self, song_id):
         song = get_instance_or_abort(Song, song_id)
-        creator_id = current_user.id
-        if song.creator_id != creator_id:
+        creator_id = current_user.creator.creator_id
+        if song.creator.creator_id != creator_id:
             return jsonify({'message' : 'your are not the creator' })
         
 
@@ -175,11 +225,12 @@ class PlaylistResource(Resource):
         playlists = Playlist.query.all()
         return playlists
 
-    @auth_required
+    @auth_required()
     def post(self):
-        
+        print('before')
         data = request.get_json()
-        new_playlist = Playlist(user_id=data['user_id'])
+        print(data)
+        new_playlist = Playlist(creator_id=current_user.creator.creator_id, name = data.get('name'))
         db.session.add(new_playlist)
         db.session.commit()
         return {"message": "Playlist created successfully", "id": new_playlist.id}, 201
@@ -187,29 +238,36 @@ class PlaylistResource(Resource):
     @auth_required()
     def put(self, playlist_id):
         playlist = get_instance_or_abort(Playlist, playlist_id)
-        creator_id = current_user.id
+        creator_id = current_user.creator.creator_id
         if playlist.creator_id != creator_id:
             return jsonify({'message' : 'your are not the creator' })
         
         data = request.get_json()
-        playlist.user_id = data.get('user_id', playlist.user_id)
+        playlist.creator_id = data.get('user_id', playlist.creator_id)
         db.session.commit()
         return {"message": "Playlist updated successfully"}
 
-    @auth_required
+    @auth_required()
     def delete(self, playlist_id):
         playlist = get_instance_or_abort(Playlist, playlist_id)
-        creator_id = current_user.id
+        creator_id = current_user.creator.creator_id
         if playlist.creator_id != creator_id:
             return jsonify({'message' : 'your are not the creator' })
         
         db.session.delete(playlist)
         db.session.commit()
-  
+
+class RatingResource(Resource):
+    # @marshal_with(rating_fields)
+    def post(self, song_id = None):
+        data = request.json()
+
+        
+        
 
 # Add resources to the API
 api.add_resource(UserResource, '/users', '/users/<int:user_id>')
 api.add_resource(CreatorResource, '/creators', '/creators/<int:creator_id>')
 api.add_resource(SongResource, '/songs', '/songs/<int:song_id>')
 api.add_resource(PlaylistResource, '/playlists', '/playlists/<int:playlist_id>')
-
+api.add_resource(RatingResource, '/songs/<int:song_id>/ratings', )

@@ -21,11 +21,11 @@ class User(db.Model, UserMixin):
 
 
 class Creator(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
+    creator_id = db.Column(db.Integer, primary_key = True)
     artist_name = db.Column(db.String)
     songs = db.relationship('Song', backref = 'creator')
     playlists = db.relationship('Playlist', backref='creator')
-    creator_id = db.Column(db.Integer, db.ForeignKey('user.id')) # change the value to user_id
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id')) # change the value to user_id
 
 
 class Role(db.Model, RoleMixin):
@@ -42,7 +42,7 @@ class Song(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String, nullable = False)
     description = db.Column(db.String)
-    creator_id = db.Column(db.Integer, db.ForeignKey('creator.id'))
+    creator_id = db.Column(db.Integer, db.ForeignKey('creator.creator_id'), nullable = False)
     playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.id'))
     ratings = db.relationship('Rating', backref='song')  
 
@@ -56,6 +56,6 @@ class Rating(db.Model):
 class Playlist(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String, nullable = False)
-    user_id = db.Column(db.Integer, db.ForeignKey('creator.id'))
+    creator_id = db.Column(db.Integer, db.ForeignKey('creator.creator_id'))
     songs = db.relationship('Song', backref='playlist')
     created_at = db.Column(db.DateTime(), default = datetime.now())

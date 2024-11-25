@@ -22,7 +22,7 @@ def login():
         return jsonify({"message" : "invalid email"}), 404
     
     if verify_password(password, user.password):
-        return jsonify({'token' : user.get_auth_token(), 'email' : user.email, 'role' : user.roles[0].name, 'id' : user.id, 'creator_id' : user.creator and user.creator.id or None})
+        return jsonify({'token' : user.get_auth_token(), 'email' : user.email, 'role' : user.roles[0].name, 'id' : user.id, 'creator_id' : user.creator and user.creator.creator_id or None})
     
     return jsonify({'message' : 'password wrong'}), 400
 
