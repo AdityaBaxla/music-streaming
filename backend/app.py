@@ -10,7 +10,7 @@ def createApp():
     app.config.from_object(LocalDevelopmentConfig)
 
     # allowing cors 
-    CORS(app, origins='http://127.0.0.1:5173')
+    CORS(app, origins=['http://127.0.0.1:5173', 'http://localhost:5173'])
 
     db.init_app(app)
 

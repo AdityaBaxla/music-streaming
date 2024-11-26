@@ -42,6 +42,9 @@ class Song(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String, nullable = False)
     description = db.Column(db.String)
+    mp3_file = db.Column(db.LargeBinary, nullable=True) # change to true when frontend is active
+    image_file = db.Column(db.LargeBinary, nullable=True) # change to true when frontend is active
+    image_mimetype = db.Column(db.String)
     creator_id = db.Column(db.Integer, db.ForeignKey('creator.creator_id'), nullable = False)
     playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.id'))
     ratings = db.relationship('Rating', backref='song')  

@@ -180,12 +180,22 @@ class SongResource(Resource):
 
     @auth_required()
     def post(self):
-        data = request.get_json()
-        print(data)
+        name = request.form['name']
+        description = request.form['description']
+        mp3_file = request.files['mp3_file']
+        image_file = request.files['image_file']
+
+        # also store the mimetype
+        image_mimetype = image_file.content_type 
+        try :
+            playlist_id = request.form['playlist_id']
+        except :
+            playlist_id = None
+        
         if (current_user.roles[0] != 'creator'):
             return {'message' : 'role not authorized'}
         creator_id = current_user.creator.creator_id 
-        new_song = Song( name = data.get('name'), description = data.get('description'),playlist_id=data.get('playlist_id'), creator_id = creator_id)
+        new_song = Song( name = name, description = description,image_file = image_file.read(), mp3_file = mp3_file.read(), playlist_id= playlist_id, creator_id = creator_id, image_mimetype = image_mimetype)
         db.session.add(new_song)
         db.session.commit()
         return {"message": "Song created successfully", "id": new_song.id}, 201
