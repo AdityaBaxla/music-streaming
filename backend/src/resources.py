@@ -4,7 +4,7 @@ from sqlalchemy import or_
 from flask_security import current_user, auth_required
 from sqlalchemy.orm import joinedload
 
-from src.model import Creator, Playlist, Role, Song, User, db
+from src.model import Creator, Playlist, Rating, Role, Song, User, db
 
 api = Api(prefix='/api')
 
@@ -258,12 +258,16 @@ class PlaylistResource(Resource):
         db.session.commit()
 
 class RatingResource(Resource):
-    # @marshal_with(rating_fields)
-    def post(self, song_id = None):
-        data = request.json()
 
-        
-        
+    @auth_required()
+    def post(self, song_id):
+        song = Song.query.get_or_404(song_id)
+        data = request.get_json()
+
+        rating = Rating(song_id = song_id, user_id = current_user.id, rating = data.get('rating'))
+        db.session.add(rating)
+        db.session.commit()
+        return jsonify({'message' : 'rating created'})
 
 # Add resources to the API
 api.add_resource(UserResource, '/users', '/users/<int:user_id>')
@@ -271,3 +275,6 @@ api.add_resource(CreatorResource, '/creators', '/creators/<int:creator_id>')
 api.add_resource(SongResource, '/songs', '/songs/<int:song_id>')
 api.add_resource(PlaylistResource, '/playlists', '/playlists/<int:playlist_id>')
 api.add_resource(RatingResource, '/songs/<int:song_id>/ratings', )
+
+
+        
