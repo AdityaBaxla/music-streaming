@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_security import Security, SQLAlchemyUserDatastore
+from flask_cors import CORS
 from src.model import db, User, Role
 from config import LocalDevelopmentConfig
 
@@ -7,6 +8,9 @@ from config import LocalDevelopmentConfig
 def createApp():
     app = Flask(__name__)
     app.config.from_object(LocalDevelopmentConfig)
+
+    # allowing cors 
+    CORS(app, origins='http://127.0.0.1:5173')
 
     db.init_app(app)
 
