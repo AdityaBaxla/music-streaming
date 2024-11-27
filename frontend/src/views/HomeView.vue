@@ -5,8 +5,15 @@
       <div class="container">
         <a class="navbar-brand" href="#">🎵 Streamify</a>
         <div class="d-flex align-items-center">
-          <button class="btn btn-outline-light me-2" @click="navigateTo('login')">Login</button>
-          <button class="btn btn-primary" @click="navigateTo('signup')">Sign Up</button>
+          <button
+            class="btn btn-outline-light me-2"
+            @click="$router.push('/login')"
+          >
+            Login
+          </button>
+          <button class="btn btn-primary" @click="$router.push('/signup')">
+            Sign Up
+          </button>
         </div>
       </div>
     </nav>
@@ -15,8 +22,12 @@
     <section class="landing-section text-center">
       <div class="container">
         <h1>Stream Your Favorite Music Anytime, Anywhere</h1>
-        <p>Explore millions of songs, podcasts, and playlists with one click.</p>
-        <button class="btn btn-primary btn-lg" @click="navigateTo('signup')">Get Started</button>
+        <p>
+          Explore millions of songs, podcasts, and playlists with one click.
+        </p>
+        <button class="btn btn-primary btn-lg" @click="$router.push('/signup')">
+          Get Started
+        </button>
       </div>
       <!-- Decorative Shapes -->
       <div class="shapes">
@@ -30,8 +41,15 @@
     <section class="scroll-section text-center py-5">
       <h2>Join the Party!</h2>
       <p>Sign up today and elevate your music streaming experience.</p>
-      <button class="btn btn-primary btn-lg" @click="navigateTo('signup')">Sign Up</button>
-      <button class="btn btn-outline-secondary btn-lg" @click="navigateTo('login')">Login</button>
+      <button class="btn btn-primary btn-lg" @click="$router.push('/signup')">
+        Sign Up
+      </button>
+      <button
+        class="btn btn-outline-secondary btn-lg"
+        @click="$router.push('/login')"
+      >
+        Login
+      </button>
     </section>
   </div>
 </template>
@@ -49,7 +67,7 @@ export default {
 <style scoped>
 /* Navbar */
 .navbar {
-  background: linear-gradient(90deg, #6C63FF, #FF6584);
+  background: linear-gradient(90deg, #6c63ff, #ff6584);
   color: white;
 }
 
@@ -64,7 +82,7 @@ export default {
 
 /* Landing Section */
 .landing-section {
-  background: linear-gradient(to bottom, #F5F6FA, #6C63FF);
+  background: linear-gradient(to bottom, #f5f6fa, #6c63ff);
   padding: 100px 20px;
   position: relative;
   overflow: hidden;
@@ -89,7 +107,7 @@ export default {
 .circle {
   width: 200px;
   height: 200px;
-  background: #FF6584;
+  background: #ff6584;
   border-radius: 50%;
   position: absolute;
   top: 20%;
@@ -101,7 +119,7 @@ export default {
   height: 0;
   border-left: 100px solid transparent;
   border-right: 100px solid transparent;
-  border-bottom: 200px solid #FFD166;
+  border-bottom: 200px solid #ffd166;
   position: absolute;
   top: 50%;
   left: 80%;
@@ -110,7 +128,7 @@ export default {
 .rectangle {
   width: 150px;
   height: 50px;
-  background: #06D6A0;
+  background: #06d6a0;
   position: absolute;
   bottom: 10%;
   right: 20%;
@@ -118,7 +136,7 @@ export default {
 
 /* Scroll Section */
 .scroll-section {
-  background-color: #F5F6FA;
+  background-color: #f5f6fa;
   color: #333333;
 }
 
