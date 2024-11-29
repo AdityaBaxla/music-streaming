@@ -180,13 +180,35 @@ class SongResource(Resource):
 
     @auth_required()
     def post(self):
+        # try :
+        #     name = request.form['name']
+        #     description = request.form['description']
+        #     mp3_file = request.files['mp3_file']
+        #     image_file = request.files['image_file']
+        # except:
+        #     name = None
+        #     description = None
+        #     mp3_file = None
+        #     image_file = None 
         name = request.form['name']
+        print(name)
         description = request.form['description']
-        mp3_file = request.files['mp3_file']
-        image_file = request.files['image_file']
+        print(description)
+        try:
+            mp3_file = request.files['mp3_file']
+        except:
+            mp3_file = None
+        print(mp3_file)
+        try:
+            image_file = request.files['image_file']
+        except:
+            image_file = None
+        print(image_file)
+
+    
 
         # also store the mimetype
-        image_mimetype = image_file.content_type 
+        image_mimetype = image_file.content_type if image_file else None
         try :
             playlist_id = request.form['playlist_id']
         except :
@@ -195,7 +217,8 @@ class SongResource(Resource):
         if (current_user.roles[0] != 'creator'):
             return {'message' : 'role not authorized'}
         creator_id = current_user.creator.creator_id 
-        new_song = Song( name = name, description = description,image_file = image_file.read(), mp3_file = mp3_file.read(), playlist_id= playlist_id, creator_id = creator_id, image_mimetype = image_mimetype)
+        print('here')
+        new_song = Song( name = name, description = description,image_file = image_file.read() if image_file else None, mp3_file = mp3_file.read() if mp3_file else None, playlist_id= playlist_id, creator_id = creator_id, image_mimetype = image_mimetype)
         db.session.add(new_song)
         db.session.commit()
         return {"message": "Song created successfully", "id": new_song.id}, 201
@@ -204,7 +227,7 @@ class SongResource(Resource):
     def put(self, song_id):
         song = Song.query.get_or_404(song_id)
         # check if the the song is created by the user
-        print(current_user.creator.songs)
+   
         if (current_user.roles[0] != 'creator'):
             return {'message' : 'role not authorized'}
         creator_id = current_user.creator.creator_id 
