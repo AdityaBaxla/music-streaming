@@ -1,30 +1,45 @@
 <template>
-    <div>
-        <div v-for="song in songs">
-            <h2>{{ song.name }}</h2>
-            <h3>{{ song.description }}</h3>
-            <h3>{{ song.creator.artist_name }}</h3>
-        </div>
-    </div>
+  <div>
+    <SongComponent
+      class="song-comp"
+      v-for="song in songs"
+      :key="song.id"
+      :name="song.name"
+      :artist_name="song.artist_name"
+      :creator_id="song.creator_id"
+      :description="song.description"
+    >
+    </SongComponent>
+  </div>
 </template>
 
 <script>
-import { customFetch } from '@/utils/customFetch';
+import SongComponent from "@/components/SongComponent.vue";
+import { customFetch } from "@/utils/customFetch";
 
-    export default {
-        data(){
-            return {
-                songs : []                
-            }
-        },
-        methods : {
-            async getSongs(){
-                const res = await customFetch('/api/songs')
-                this.songs = await res.json()
-            }
-        },
-        mounted(){
-             this.getSongs()
-        },
-    }
+export default {
+  data() {
+    return {
+      songs: [],
+    };
+  },
+  methods: {
+    async getSongs() {
+      const res = await customFetch("/api/songs");
+      this.songs = await res.json();
+    },
+  },
+  mounted() {
+    this.getSongs();
+  },
+  components: {
+    SongComponent,
+  },
+};
 </script>
+
+<style scoped>
+.song-comp {
+  margin: 2em;
+}
+</style>

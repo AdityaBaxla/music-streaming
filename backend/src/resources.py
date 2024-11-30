@@ -1,4 +1,5 @@
-from flask import abort, jsonify, request
+from io import BytesIO
+from flask import abort, jsonify, request, send_file, url_for
 from flask_restful import Resource, Api, fields, marshal_with
 from sqlalchemy import or_
 from flask_security import current_user, auth_required
@@ -79,7 +80,9 @@ song_fields = {
         'song_id': fields.Integer,
         'rating': fields.Integer,
         'created_at': fields.DateTime
-    }))
+    })),
+    'image_url': fields.String,
+    'audio_url': fields.String,
 }
 
 
@@ -131,10 +134,36 @@ class CreatorResource(Resource):
 class SongResource(Resource):
     @marshal_with(song_fields)
     def get(self, song_id = None):
+
+       
         if song_id:
             song = Song.query.get(song_id)
+            song.image_url = (
+            url_for('fileserveapi', song_id=song.id, file_type='image', _external=True)
+            if song.image_file
+            else None
+        )
+            song.audio_url = (
+            url_for('fileserveapi', song_id=song.id, file_type='audio', _external=True)
+            if song.mp3_file
+            else None
+        )
             return song
+        
+
+        # for getting all songs
         songs = Song.query.all()
+        for song in songs:
+            song.image_url = (
+                url_for('fileserveapi', song_id=song.id, file_type='image', _external=True)
+                if song.image_file
+                else None
+            )
+            song.audio_url = (
+                url_for('fileserveapi', song_id=song.id, file_type='audio', _external=True)
+                if song.mp3_file
+                else None
+            )
         return songs
 
 
@@ -302,12 +331,36 @@ class RatingResource(Resource):
         db.session.commit()
         return jsonify({'message' : 'rating created'})
 
+class FileServeAPI(Resource):
+    def get(self, song_id, file_type):
+        song = Song.query.get(song_id)
+        if not song:
+            return {'message': 'Song not found'}, 404
+
+        if file_type == 'image':
+            if not song.image_file:
+                return {'message': 'Image not found'}, 404
+            return send_file(
+                BytesIO(song.image_file),
+                mimetype=song.image_mimetype,
+                as_attachment=False
+            )
+        elif file_type == 'audio':
+            if not song.mp3_file:
+                return {'message': 'Audio file not found'}, 404
+            return send_file(
+                BytesIO(song.mp3_file),
+                mimetype='audio/mpeg',
+                as_attachment=False
+            )
+        return {'message': 'Invalid file type'}, 400
+
 # Add resources to the API
 api.add_resource(UserResource, '/users', '/users/<int:user_id>')
 api.add_resource(CreatorResource, '/creators', '/creators/<int:creator_id>')
 api.add_resource(SongResource, '/songs', '/songs/<int:song_id>')
 api.add_resource(PlaylistResource, '/playlists', '/playlists/<int:playlist_id>')
 api.add_resource(RatingResource, '/songs/<int:song_id>/ratings', )
-
+api.add_resource(FileServeAPI, '/song/<int:song_id>/<string:file_type>')
 
         
