@@ -1,15 +1,19 @@
 <template>
-  <div>
-    <SongComponent
-      class="song-comp"
-      v-for="song in songs"
-      :key="song.id"
-      :name="song.name"
-      :artist_name="song.artist_name"
-      :creator_id="song.creator_id"
-      :description="song.description"
-    >
-    </SongComponent>
+  <button @click="$router.push('/songs/upload')">Upload</button>
+  <div>Your Songs:</div>
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 col-sm-6 col-12 card-container mb-2" v-for="song in songs" :key="song.id">
+        <SongComponent
+          :name="song.name"
+          :artist_name="song.artist_name"
+          :creator_id="song.creator_id"
+          :description="song.description"
+          :image_url="song.image_url"
+          :audio_url="song.audio_url"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -27,6 +31,7 @@ export default {
     async getSongs() {
       const res = await customFetch("/api/songs");
       this.songs = await res.json();
+      console.log(this.songs)
     },
   },
   mounted() {
@@ -41,5 +46,9 @@ export default {
 <style scoped>
 .song-comp {
   margin: 2em;
+}
+
+.card-container {
+    margin: 1rem; /* Adjust the margin as needed */
 }
 </style>

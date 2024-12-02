@@ -4,6 +4,7 @@ import LoginView from '@/views/LoginView.vue'
 import SongsView from '@/views/SongsView.vue'
 import UploadSongView from '@/views/UploadSongView.vue'
 import RegisterView from '@/views/RegisterView.vue'
+import CreatorDashboardView from '@/views/CreatorDashboardView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,6 +18,7 @@ const router = createRouter({
     {path: '/register', component : RegisterView},
     {path: '/signup', component : RegisterView},
     {path: '/songs', component : SongsView},
+    {path: '/creator-dashboard', component:CreatorDashboardView},
     {path: '/songs/upload', component : UploadSongView},
     {
       path: '/about',

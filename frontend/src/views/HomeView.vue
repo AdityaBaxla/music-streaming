@@ -3,7 +3,7 @@
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg py-3">
       <div class="container">
-        <a class="navbar-brand" href="#">🎵 Streamify</a>
+        <router-link to="/" class="navbar-brand" href="#">🎵 Streamify</router-link>
         <div class="d-flex align-items-center">
           <button
             class="btn btn-outline-light me-2"

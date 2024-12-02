@@ -1,28 +1,35 @@
 <template>
-    <div>
-      <div>
-        <label for="title">Song Title:</label>
-        <input type="text" v-model="title" id="title" required />
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="title">Song Title:</label>
+          <input type="text" v-model="title" id="title" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="description">Description:</label>
+          <input type="text" 
+ v-model="description" id="description" class="form-control" required />
+        </div>
+        <div class="form-group">
+          <label for="playlist_id">Playlist ID:</label>
+          <input type="text" v-model="playlist_id" id="playlist_id" class="form-control" required />
+        </div>
       </div>
-      <div>
-        <label for="description">Description:</label>
-        <input type="text" v-model="description" id="description" required />
+      <div class="col-md-6">
+        <div class="form-group">
+          <label for="mp3_file">Upload MP3:</label>
+          <input type="file" @change="onFileChange($event, 'mp3')" id="mp3_file" accept=".mp3" class="form-control-file" required />
+        </div>
+        <div class="form-group">
+          <label for="image_file">Upload Image:</label>
+          <input type="file" @change="onFileChange($event, 'image')" id="image_file" accept="image/*" class="form-control-file" required />
+        </div>
+        <button type="button" class="btn btn-primary" @click="uploadFiles">Upload</button>
       </div>
-      <div>
-        <label for="playlist_id">playlist:</label>
-        <input type="text" v-model="playlist_id" id="playlist_id" required />
-      </div>
-      <div>
-        <label for="mp3_file">Upload MP3:</label>
-        <input type="file" @change="onFileChange($event, 'mp3')" id="mp3_file" accept=".mp3" required />
-      </div>
-      <div>
-        <label for="image_file">Upload Image:</label>
-        <input type="file" @change="onFileChange($event, 'image')" id="image_file" accept="image/*" required />
-      </div>
-      <button @click="uploadFiles">Upload</button>
     </div>
-  </template>
+  </div>
+</template>
   
   <script>
 import { useUserStore } from '@/stores/user';
@@ -61,13 +68,13 @@ import { customFetch } from '@/utils/customFetch';
         if (this.playlist_id) formData.append('playlist_id', this.playlist_id);
 
         try {
-          const response = await fetch('http://127.0.0.1:5000/api/songs', {
-            method: 'POST',
-            headers : {
-                'Authentication-Token' : this.userStore.token,
-            },
-            body: formData,
-          });
+            const response = await fetch('http://127.0.0.1:5000/api/songs', {
+              method: 'POST',
+              headers : {
+                  'Authentication-Token' : this.userStore.token,
+              },
+              body: formData,
+            });
   
           if (response.ok) {
             const result = await response.json();

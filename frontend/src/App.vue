@@ -1,16 +1,28 @@
-<script setup>
+
+<template>
+  <Navbar />
+  <RouterView />
+</template>
+
+<script>
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import { useUserStore } from './stores/user';
+import Navbar from './components/Navbar.vue';
 
-// calling the setUser once to populate userStore
-const userStore = useUserStore()
-userStore.setUser()
+
+
+export default {
+  components : {
+    Navbar,
+  },
+  mounted() {
+    // calling the setUser once to populate userStore
+    const userStore = useUserStore()
+    userStore.setUser()
+  },
+}
 </script>
-
-<template>
-  <RouterView />
-</template>
 
 
 

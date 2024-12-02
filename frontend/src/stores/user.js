@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue'
 import { defineStore, setActivePinia } from 'pinia'
+import router from '@/router';
 
 export const useUserStore = defineStore('user', {
   state : () => {
@@ -13,11 +14,11 @@ export const useUserStore = defineStore('user', {
     }
   },
   getters: {
-    isAuthenticated(state) {
-      return !!state.token;
+    isAuthenticated() {
+      return !!this.token;
     },
-    userName(state) {
-      return state.user_name ? state.user.name : 'Guest';
+    userName() {
+      return this.user_name ? this.user.name : 'Guest';
     },
   },
   actions: {
@@ -48,6 +49,12 @@ export const useUserStore = defineStore('user', {
       this.creator_id = null
       this.email = null
       this.role = null
+
+      console.log('logout state')
+
+      localStorage.clear('user')
+
+      
     },
   },
   // persist : true, // enable persistence
